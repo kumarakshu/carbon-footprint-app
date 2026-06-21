@@ -1,0 +1,21 @@
+# Stage 1: Build the React App
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+COPY package*.json ./
+# Use npm ci if package-lock is present, else install
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+# Stage 2: Serve the App
+FROM node:18-alpine
+
+WORKDIR /app
+RUN npm install -g serve
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 8080
+
+CMD ["serve", "-s", "dist", "-l", "8080"]
